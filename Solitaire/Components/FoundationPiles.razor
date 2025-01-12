@@ -1,0 +1,35 @@
+@using Solitaire.Game
+@foreach (var pile in Foundations.Select((cards, index) => new { Cards = cards, Index = index + 10 }))
+{
+    <DropZone TargetIndex="@pile.Index" OnDropCallback="HandleDrop">
+        <div class="h-[200px] w-[100px] border border-gray-300 bg-green-100 flex items-center justify-center">
+            @if (pile.Cards.Any())
+            {
+                <SolitaireCard GameCard="@pile.Cards.Peek()" SourcePile="Foundation" SourceIndex="@pile.Index" />
+            }
+            else
+            {
+                <span>Empty</span>
+            }
+        </div>
+    </DropZone>
+}
+
+@code {
+    [Parameter] public List<Stack<Card>> Foundations { get; set; } = default!;
+    [Inject] public SolitaireState State { get; set; } = default!;
+
+    
+    private void HandleDrop(int targetIndex)
+    {
+        if (State.CurrentDragData is null)
+        {
+            Console.WriteLine("No drag data available for drop.");
+            return;
+        }
+
+        var draggedCard = State.CurrentDragData.Card;
+        State.PerformMove(new Move(MoveType.TableauToFoundation, draggedCard, State.CurrentDragData.SourceIndex, targetIndex - 10));
+        State.CurrentDragData = null;
+    }
+}

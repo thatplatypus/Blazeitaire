@@ -1,0 +1,59 @@
+@using System.Text.Json
+@using Solitaire.Game
+@foreach (var pile in TableauStack.Select((cards, index) => new { Cards = cards, Index = index }))
+{
+    <DropZone TargetIndex="@pile.Index" OnDropCallback="@HandleDrop">
+        <div class="flex flex-col items-center align-middle">
+            @foreach (var card in pile.Cards)
+            {
+                <SolitaireCard GameCard="card" SourcePile="Tableau" SourceIndex="@pile.Index" CardIndex="@pile.Cards.IndexOf(card)" />
+            }
+        </div>
+    </DropZone>
+}
+
+
+@code {
+    [Parameter] public List<List<Game.Card>> TableauStack { get; set; } = default!;
+    [Inject] public SolitaireState State { get; set; } = default!;
+
+    private void HandleDragCallback(DragEventArgs args)
+    {
+        Console.WriteLine(JsonSerializer.Serialize(args));
+
+        HandleDrop((int)args.Detail);
+    }
+
+    private void HandleDrop(int targetIndex)
+    {
+        if (State.CurrentDragData is null)
+        {
+            Console.WriteLine("No drag data available for drop.");
+            return;
+        }
+
+        var draggedCard = State.CurrentDragData.Card;
+        var sourcePileIndex = State.CurrentDragData.SourceIndex;
+
+        Console.WriteLine($"Dropped card: {draggedCard.Rank} of {draggedCard.Suit} from pile {sourcePileIndex} to pile {targetIndex}");
+
+        if (sourcePileIndex == targetIndex)
+        {
+            Console.WriteLine("Move ignored: Source and target piles are the same.");
+            return;
+        }
+
+        bool moveSuccessful = State.PerformMove(new Move(MoveType.TableauToTableau, draggedCard, sourcePileIndex, targetIndex));
+
+        if (moveSuccessful)
+        {
+            Console.WriteLine($"Move successful: {draggedCard.Rank} of {draggedCard.Suit} to pile {targetIndex}");
+        }
+        else
+        {
+            Console.WriteLine($"Move failed: {draggedCard.Rank} of {draggedCard.Suit} to pile {targetIndex}");
+        }
+
+        State.CurrentDragData = null; 
+    }
+}

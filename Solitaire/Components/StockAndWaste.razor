@@ -1,0 +1,42 @@
+@using Solitaire.Game
+<div class="flex gap-4">
+    <div class="h-[200px] w-[100px] border border-gray-300 bg-blue-500 text-white flex items-center justify-center"
+         @onclick="HandleStockClick">
+        @if (Stock.Any())
+        {
+            <span>Card Back</span>
+        }
+        else
+        {
+            <span>Empty</span>
+        }
+    </div>
+    <div class="h-[200px] w-[100px] border border-gray-300 bg-gray-100 flex items-center justify-center">
+        @if (Waste.Any())
+        {
+            <SolitaireCard GameCard="@Waste.Peek()" SourcePile="Waste" SourceIndex="-1" />
+        }
+        else
+        {
+            <span>Empty</span>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Stack<Card> Stock { get; set; } = default!;
+    [Parameter] public Stack<Card> Waste { get; set; } = default!;
+    [Inject] public SolitaireState State { get; set; } = default!;
+
+    private void HandleStockClick()
+    {
+        if (Stock.Any())
+        {
+            State.PerformMove(new Move(MoveType.StockToWaste, null, -1, -1));
+        }
+        else
+        {
+            Console.WriteLine("No cards left in the stock.");
+        }
+    }
+}

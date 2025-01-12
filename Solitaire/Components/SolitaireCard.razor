@@ -1,0 +1,88 @@
+@using Solitaire.Game
+<div draggable="true"
+     @ondragstart="OnDragStart"
+     class="flex items-center justify-center h-[200px] w-[125px] border border-black rounded bg-white text-lg p-1 hover:border-2">
+    @if (GameCard.IsFaceUp)
+    {
+    <div class="h-full flex flex-col w-full">
+        <div class="flex flex-row w-full">
+            <span class="@SuitToColor(GameCard.Suit)">@(RankToDisplay(GameCard.Rank))</span>
+            <span class="@SuitToColor(GameCard.Suit)">@(SuitToDisplay(GameCard.Suit))</span>
+        </div>
+        <div class="flex flex-grow-1 w-full h-full"></div>
+        <div class="flex flex-row">
+            <div class="flex flex-grow-1 w-full h-full"></div>
+            <span class="@SuitToColor(GameCard.Suit)">@(SuitToDisplay(GameCard.Suit))</span>
+            <span class="@SuitToColor(GameCard.Suit)">@(RankToDisplay(GameCard.Rank))</span>
+
+        </div>
+    </div>
+    }
+    else
+    {
+    <div class="bg-blue-500 w-full h-full flex items-center justify-center text-white">
+        <span>Card Back</span>
+    </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Game.Card GameCard { get; set; } = default!;
+    [Parameter] public string SourcePile { get; set; } = "";
+    [Parameter] public int SourceIndex { get; set; }
+    [Parameter] public int? CardIndex { get; set; }
+    [Parameter] public EventCallback<DragEventArgs> OnDropCallback { get; set; }
+    [Inject] public SolitaireState State { get; set; } = default!;
+
+    private string SuitToColor(Suit suit)
+    {
+        return suit switch
+        {
+            Suit.Hearts => "text-red",
+            Suit.Diamonds => "text-red",
+            Suit.Clubs => "text-black",
+            Suit.Spades => "text-black",
+                _ => throw new ArgumentOutOfRangeException(nameof(suit), suit, null)
+        };
+    }
+
+    private string SuitToDisplay(Suit suit)
+    {
+        return suit switch
+        {
+            Suit.Diamonds => "\u2666\ufe0f",
+            Suit.Hearts => "\u2665\ufe0f",
+            Suit.Spades => "\u2660\ufe0f",
+            Suit.Clubs => "\u2663\ufe0f",
+                _ => throw new ArgumentOutOfRangeException(nameof(suit), suit, null)
+        };
+    }
+
+    private string RankToDisplay(Rank rank)
+    {
+        return rank switch
+        {
+            Rank.Ace => "A",
+            Rank.Two => "2",
+            Rank.Three => "3",
+            Rank.Four => "4",
+            Rank.Five => "5",
+            Rank.Six => "6",
+            Rank.Seven => "7",
+            Rank.Eight => "8",
+            Rank.Nine => "9",
+            Rank.Ten => "10",
+            Rank.Jack => "J",
+            Rank.Queen => "Q",
+            Rank.King => "K",
+            Rank.Joker => "J",
+            _ => throw new ArgumentOutOfRangeException(nameof(rank), rank, null)
+        };
+    }
+
+    private void OnDragStart(DragEventArgs args)
+    {
+        State.CurrentDragData = new DragData(GameCard, SourcePile, SourceIndex, CardIndex);
+        Console.WriteLine($"Drag started: {GameCard.Rank} of {GameCard.Suit}");
+    }
+}

@@ -1,0 +1,39 @@
+﻿@page "/"
+@using Solitaire.Components
+@implements IDisposable
+<PageTitle>Home</PageTitle>
+
+<header class="bg-blue-200 p-4 shadow-md">
+    <div class="flex flex-row items-center w-full gap-4">
+        <IconButton Name="@Icons.Undo" OnClick="@State.Undo" Disabled="@(!State.CanUndo)" />
+        <IconButton Name="@Icons.Redo" OnClick="@State.Redo" Disabled="@(!State.CanRedo)" />
+        <div class="flex flex-1" />
+        <PrimaryActionButton Text="Start Game" OnClick="@State.ResetGame" />
+    </div>
+</header>
+
+<div class="container mx-auto mt-4">
+    <div class="gap-4 flex flex-row">
+        <FoundationPiles Foundations="State.Foundations" />
+
+        <StockAndWaste Stock="State.Stock" Waste="State.Waste" />
+    </div>
+
+    <div class="mt-8 gap-4 flex flex-row">
+        <Tableau TableauStack="State.Tableau" />
+    </div>
+</div>
+
+@code {
+[Inject] public SolitaireState State { get; set; } = default!;
+
+protected override void OnInitialized()
+{
+State.StateChanged += StateHasChanged;
+}
+
+public void Dispose()
+{
+State.StateChanged -= StateHasChanged;
+}
+}

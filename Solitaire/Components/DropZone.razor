@@ -1,0 +1,42 @@
+<div id="@($"dropzone-{TargetIndex}")" 
+    class="drop-zone flex-grow-1 align-middle w-full @(isDraggingOver ? "drag-over" : "")"
+     ondragover="event.preventDefault();"
+     @ondragenter="OnDragEnter"
+     @ondragleave="OnDragLeave"
+     @ondrop="HandleDrop">
+    @if (ChildContent is not null)
+    {
+    @ChildContent
+    }
+    else
+    {
+    <div class="empty-pile">Empty</div>
+    }
+</div>
+
+@code {
+[Parameter] public RenderFragment? ChildContent { get; set; }
+[Parameter] public EventCallback<int> OnDropCallback { get; set; } = default!;
+[Parameter] public int TargetIndex { get; set; }
+
+private bool isDraggingOver = false;
+
+private void OnDragEnter()
+{
+isDraggingOver = true;
+Console.WriteLine($"Drag entered DropZone for TargetIndex {TargetIndex}");
+}
+
+private void OnDragLeave()
+{
+isDraggingOver = false;
+Console.WriteLine($"Drag left DropZone for TargetIndex {TargetIndex}");
+}
+
+
+private async Task HandleDrop(DragEventArgs args)
+{
+Console.WriteLine($"Drop event fired in DropZone for TargetIndex {TargetIndex}");
+await OnDropCallback.InvokeAsync(TargetIndex);
+}
+}
